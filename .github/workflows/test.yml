@@ -52,10 +52,13 @@ jobs:
             "A GitHub Actions run failed. owner=bikram-singh repo=DevSecOps-Triage-Agent-Testbed run_id=${{ github.run_id }}" \
             --url https://us-central1-aiplatform.googleapis.com/v1/projects/946672491110/locations/us-central1/reasoningEngines/8412476164056023040 \
             --mode adk \
-            --app-name app \
-            --verbose \
             > triage_raw.txt
           cat triage_raw.txt
+
+      - name: Extract triage text
+        run: |
+          sed -n '/\[devsecops_triage_agent\]:/,/^Session:/p' triage_raw.txt | sed '$d' | sed '1s/.*\[devsecops_triage_agent\]: *//' > triage_text.txt
+          cat triage_text.txt
 
       - name: Upload raw response
         if: always()
