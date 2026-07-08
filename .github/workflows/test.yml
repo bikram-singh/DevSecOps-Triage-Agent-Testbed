@@ -34,7 +34,7 @@ jobs:
 
       - name: Call triage agent
         run: |
-          TOKEN=$(gcloud auth print-identity-token)
+          TOKEN=$(gcloud auth print-access-token)
           curl -s -X POST \
             "https://us-central1-aiplatform.googleapis.com/v1/projects/946672491110/locations/us-central1/reasoningEngines/8412476164056023040:streamQuery?alt=sse" \
             -H "Authorization: Bearer $TOKEN" \
