@@ -37,11 +37,17 @@ jobs:
         with:
           python-version: '3.12'
 
+      - name: Install uv
+        run: curl -LsSf https://astral.sh/uv/install.sh | sh
+
       - name: Install agents-cli
-        run: pip install google-agents-cli
+        run: |
+          export PATH="$HOME/.local/bin:$PATH"
+          pip install google-agents-cli
 
       - name: Call triage agent
         run: |
+          export PATH="$HOME/.local/bin:$PATH"
           agents-cli run \
             "A GitHub Actions run failed. owner=bikram-singh repo=DevSecOps-Triage-Agent-Testbed run_id=${{ github.run_id }}" \
             --url https://us-central1-aiplatform.googleapis.com/v1/projects/946672491110/locations/us-central1/reasoningEngines/8412476164056023040 \
