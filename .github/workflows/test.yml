@@ -32,23 +32,21 @@ jobs:
           workload_identity_provider: ${{ secrets.GCP_WIF_PROVIDER_NONPROD }}
           service_account: ${{ secrets.GCP_WIF_SERVICE_ACCOUNT_NONPROD }}
 
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install agents-cli
+        run: pip install google-agents-cli
+
       - name: Call triage agent
         run: |
-          TOKEN=$(gcloud auth print-access-token)
-          HTTP_STATUS=$(curl -s -o triage_raw.txt -w "%{http_code}" -X POST \
-            "https://us-central1-aiplatform.googleapis.com/v1/projects/946672491110/locations/us-central1/reasoningEngines/8412476164056023040:streamQuery?alt=sse" \
-            -H "Authorization: Bearer $TOKEN" \
-            -H "Content-Type: application/json" \
-            -d '{
-              "class_method": "async_stream_query",
-              "input": {
-                "message": "A GitHub Actions run failed. owner=bikram-singh repo=DevSecOps-Triage-Agent-Testbed run_id='"${{ github.run_id }}"'"
-              }
-            }')
-          echo "----- HTTP STATUS: $HTTP_STATUS -----"
-          echo "----- FILE SIZE -----"
-          wc -c triage_raw.txt
-          echo "----- FULL RESPONSE BODY -----"
+          agents-cli run \
+            "A GitHub Actions run failed. owner=bikram-singh repo=DevSecOps-Triage-Agent-Testbed run_id=${{ github.run_id }}" \
+            --url https://us-central1-aiplatform.googleapis.com/v1/projects/946672491110/locations/us-central1/reasoningEngines/8412476164056023040 \
+            --mode adk \
+            > triage_raw.txt
           cat triage_raw.txt
 
       - name: Upload raw response
@@ -60,7 +58,7 @@ jobs:
 
       - name: Extract triage text
         run: |
-          grep -o '"text": *"[^"]*"' triage_raw.txt | tail -1 | sed 's/"text": *"//;s/"$//' > triage_text.txt || echo "Triage response could not be parsed" > triage_text.txt
+          tail -20 triage_raw.txt > triage_text.txt
           cat triage_text.txt
 
       - name: Post PR comment
