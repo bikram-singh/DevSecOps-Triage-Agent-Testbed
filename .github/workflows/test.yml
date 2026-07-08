@@ -45,7 +45,19 @@ jobs:
                 "message": "A GitHub Actions run failed. owner=bikram-singh repo=DevSecOps-Triage-Agent-Testbed run_id='"${{ github.run_id }}"'"
               }
             }' > triage_raw.txt
-          cat triage_raw.txt
+          echo "----- FILE SIZE -----"
+          wc -c triage_raw.txt
+          echo "----- FIRST 100 LINES -----"
+          head -100 triage_raw.txt
+          echo "----- LAST 50 LINES -----"
+          tail -50 triage_raw.txt
+
+      - name: Upload raw response
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: triage-raw-response
+          path: triage_raw.txt
 
       - name: Extract triage text
         run: |
