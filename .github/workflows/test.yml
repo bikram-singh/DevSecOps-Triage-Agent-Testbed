@@ -35,7 +35,7 @@ jobs:
       - name: Call triage agent
         run: |
           TOKEN=$(gcloud auth print-access-token)
-          curl -s -X POST \
+          HTTP_STATUS=$(curl -s -o triage_raw.txt -w "%{http_code}" -X POST \
             "https://us-central1-aiplatform.googleapis.com/v1/projects/946672491110/locations/us-central1/reasoningEngines/8412476164056023040:streamQuery?alt=sse" \
             -H "Authorization: Bearer $TOKEN" \
             -H "Content-Type: application/json" \
@@ -44,13 +44,12 @@ jobs:
               "input": {
                 "message": "A GitHub Actions run failed. owner=bikram-singh repo=DevSecOps-Triage-Agent-Testbed run_id='"${{ github.run_id }}"'"
               }
-            }' > triage_raw.txt
+            }')
+          echo "----- HTTP STATUS: $HTTP_STATUS -----"
           echo "----- FILE SIZE -----"
           wc -c triage_raw.txt
-          echo "----- FIRST 100 LINES -----"
-          head -100 triage_raw.txt
-          echo "----- LAST 50 LINES -----"
-          tail -50 triage_raw.txt
+          echo "----- FULL RESPONSE BODY -----"
+          cat triage_raw.txt
 
       - name: Upload raw response
         if: always()
