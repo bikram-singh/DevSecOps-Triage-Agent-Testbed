@@ -7,4 +7,3 @@ jobs:
       - uses: actions/checkout@v4
       - name: Simulate a failure
         run: exit 1
-EOF
